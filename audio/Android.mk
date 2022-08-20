@@ -37,8 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libtinyalsa \
 	libtinycompress \
 	libaudioroute \
-	libdl \
-	libsecril-client
+	libdl
 
 
 LOCAL_C_INCLUDES += \
