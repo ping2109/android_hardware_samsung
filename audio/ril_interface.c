@@ -80,18 +80,6 @@ static int ril_connect_if_required(struct ril_handle *ril)
         return -1;
     }
 
-    ok = isConnected_RILD(ril->client);
-    if (ok) {
-        return 0;
-    }
-
-    rc = Connect_RILD(ril->client);
-    if (rc != RIL_CLIENT_ERR_SUCCESS) {
-        ALOGE("FATAL: Failed to connect to RILD: %s",
-              strerror(errno));
-        return -1;
-    }
-
     return 0;
 }
 
@@ -103,7 +91,6 @@ int ril_open(struct ril_handle *ril)
         return -1;
     }
 
-    ril->client = OpenClient_RILD();
     if (ril->client == NULL) {
         ALOGE("OpenClient_RILD() failed");
         return -1;
@@ -131,13 +118,11 @@ int ril_close(struct ril_handle *ril)
         return -1;
     }
 
-    rc = Disconnect_RILD(ril->client);
     if (rc != RIL_CLIENT_ERR_SUCCESS) {
         ALOGE("Disconnect_RILD failed");
         return -1;
     }
 
-    rc = CloseClient_RILD(ril->client);
     if (rc != RIL_CLIENT_ERR_SUCCESS) {
         ALOGE("CloseClient_RILD() failed");
         return -1;
@@ -159,11 +144,6 @@ int ril_set_wb_amr_callback(struct ril_handle *ril,
 
     _wb_amr_callback = fn;
     _wb_amr_data = data;
-
-    ALOGV("%s: RegisterUnsolicitedHandler(%d, %p)",
-          __func__,
-          RIL_UNSOL_SNDMGR_WB_AMR_REPORT,
-          ril_set_wb_amr_callback);
 
     /* register the wideband AMR callback */
     rc = RegisterUnsolicitedHandler(ril->client,
@@ -190,9 +170,6 @@ int ril_set_call_volume(struct ril_handle *ril,
         return 0;
     }
 
-    rc = SetCallVolume(ril->client,
-                       sound_type,
-                       (int)(volume * ril->volume_steps_max));
     if (rc != 0) {
         ALOGE("%s: SetCallVolume() failed, rc=%d", __func__, rc);
     }
@@ -210,11 +187,6 @@ int ril_set_call_audio_path(struct ril_handle *ril, enum _AudioPath path)
         return 0;
     }
 
-    rc = SetCallAudioPath(ril->client, path);
-    if (rc != 0) {
-        ALOGE("%s: SetCallAudioPath() failed, rc=%d", __func__, rc);
-    }
-
     return rc;
 }
 
@@ -227,11 +199,6 @@ int ril_set_call_clock_sync(struct ril_handle *ril,
     if (rc != 0) {
         ALOGE("%s: Failed to connect to RIL (%s)", __func__, strerror(rc));
         return 0;
-    }
-
-    rc = SetCallClockSync(ril->client, condition);
-    if (rc != 0) {
-        ALOGE("%s: SetCallClockSync() failed, rc=%d", __func__, rc);
     }
 
     return rc;
@@ -247,11 +214,6 @@ int ril_set_mute(struct ril_handle *ril, enum _MuteCondition condition)
         return 0;
     }
 
-    rc = SetMute(ril->client, condition);
-    if (rc != 0) {
-        ALOGE("%s: SetMute() failed, rc=%d", __func__, rc);
-    }
-
     return rc;
 }
 
@@ -265,11 +227,6 @@ int ril_set_two_mic_control(struct ril_handle *ril,
     if (rc != 0) {
         ALOGE("%s: Failed to connect to RIL (%s)", __func__, strerror(rc));
         return 0;
-    }
-
-    rc = SetTwoMicControl(ril->client, device, report);
-    if (rc != 0) {
-        ALOGE("%s: SetTwoMicControl() failed, rc=%d", __func__, rc);
     }
 
     return rc;
